@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- En-tête -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0">⚡ Borne {{ borne.identifiant }}</h2>
+    <a href="{% url 'bornes:liste' %}" class="btn btn-outline-secondary btn-sm">
+      ← Retour aux bornes
+    </a>
+  </div>
+
+  <!-- Fiche borne -->
+  <div class="row g-4 mb-5">
+
+    <div class="col-md-6">
+      <div class="card border-0 h-100"
+           style="background:#161b22; border:1px solid #30363d !important;">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-4 text-secondary">📋 Informations générales</h5>
+
+          <table class="table table-borderless mb-0">
+            <tbody>
+              <tr>
+                <td class="text-secondary">Identifiant</td>
+                <td class="fw-bold">{{ borne.identifiant }}</td>
+              </tr>
+              <tr>
+                <td class="text-secondary">Ville</td>
+                <td>{{ borne.ville }}</td>
+              </tr>
+              <tr>
+                <td class="text-secondary">Emplacement</td>
+                <td>{{ borne.emplacement }}</td>
+              </tr>
+              <tr>
+                <td class="text-secondary">Puissance</td>
+                <td>{{ borne.puissance_kw }} kW</td>
+              </tr>
+              <tr>
+                <td class="text-secondary">Connecteur</td>
+                <td>{{ borne.type_connecteur }}</td>
+              </tr>
+              <tr>
+                <td class="text-secondary">Installation</td>
+                <td>{{ borne.date_installation|date:"d/m/Y" }}</td>
+              </tr>
+              <tr>
+                <td class="text-secondary">Statut</td>
+                <td>
+                  {% if borne.statut == 'libre' %}
+                    <span class="badge bg-primary">Libre</span>
+                  {% elif borne.statut == 'occupee' %}
+                    <span class="badge bg-warning text-dark">Occupée</span>
+                  {% else %}
+                    <span class="badge bg-secondary">En maintenance</span>
+                  {% endif %}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistiques sessions -->
+    <div class="col-md-6">
+      <div class="card border-0 h-100"
+           style="background:#161b22; border:1px solid #30363d !important;">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-4 text-secondary">📊 Statistiques</h5>
+
+          <div class="row g-3">
+            <div class="col-6">
+              <div class="text-center p-3"
+                   style="background:#0d1117; border-radius:8px;">
+                <div class="fs-3 fw-bold text-primary">{{ sessions.count }}</div>
+                <div class="text-secondary small">Sessions</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="text-center p-3"
+                   style="background:#0d1117; border-radius:8px;">
+                <div class="fs-3 fw-bold text-success">
+                  {% with total=sessions|length %}
+                    {{ borne.puissance_kw }} kW
+                  {% endwith %}
+                </div>
+                <div class="text-secondary small">Puissance max</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Historique des sessions -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold mb-0">🔋 Historique des sessions</h5>
+    <a href="{% url 'bornes:session_ajouter' %}"
+       class="btn btn-primary btn-sm">➕ Ajouter une session</a>
+  </div>
+
+  <table class="table table-hover align-middle">
+    <thead class="table-dark">
+      <tr>
+        <th>Date de début</th>
+        <th>Durée</th>
+        <th>Énergie (kWh)</th>
+        <th>Coût estimé</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in sessions %}
+      <tr>
+        <td>{{ s.date_debut|date:"d/m/Y H:i" }}</td>
+        <td>{{ s.duree_formatee }}</td>
+        <td><span class="badge bg-success">{{ s.energie_kwh }} kWh</span></td>
+        <td>{{ s.cout_estime }} €</td>
+        <td>
+          <div class="d-flex gap-1">
+            <a href="{% url 'bornes:session_modifier' s.pk %}"
+               class="btn btn-sm btn-outline-warning">✏️</a>
+            <a href="{% url 'bornes:session_supprimer' s.pk %}"
+               class="btn btn-sm btn-outline-danger">🗑️</a>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+        <tr>
+          <td colspan="5" class="text-center text-muted">
+            Aucune session pour cette borne.
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</div>
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0">🔋 Sessions de charge</h2>
+    <div class="d-flex gap-2">
+      <a href="{% url 'bornes:session_ajouter' %}" class="btn btn-primary btn-sm">
+        ➕ Ajouter une session
+      </a>
+      <a href="{% url 'bornes:liste' %}" class="btn btn-outline-secondary btn-sm">
+        ← Retour aux bornes
+      </a>
+    </div>
+  </div>
+
+  <!-- Statistiques globales -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card border-0 text-center py-3"
+           style="background:#161b22; border:1px solid #30363d !important;">
+        <div class="fs-2 fw-bold text-primary">{{ stats.total_sessions }}</div>
+        <div class="text-secondary small">Sessions totales</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 text-center py-3"
+           style="background:#161b22; border:1px solid #30363d !important;">
+        <div class="fs-2 fw-bold text-success">
+          {{ stats.total_energie|floatformat:1 }} kWh
+        </div>
+        <div class="text-secondary small">Énergie totale délivrée</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 text-center py-3"
+           style="background:#161b22; border:1px solid #30363d !important;">
+        <div class="fs-2 fw-bold text-warning">
+          {{ stats.duree_moyenne|floatformat:0 }} min
+        </div>
+        <div class="text-secondary small">Durée moyenne</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <form method="get" class="row g-2 mb-4">
+    <div class="col-md-4">
+      <select name="borne" class="form-select">
+        <option value="">Toutes les bornes</option>
+        {% for b in bornes %}
+          <option value="{{ b.id }}"
+            {% if params.borne == b.id|stringformat:"s" %}selected{% endif %}>
+            {{ b.identifiant }} — {{ b.ville }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <input type="date" name="date_debut" class="form-control"
+             value="{{ params.date_debut }}">
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+    </div>
+    <div class="col-md-2">
+      <a href="{% url 'bornes:sessions' %}" class="btn btn-outline-secondary w-100">Reset</a>
+    </div>
+  </form>
+
+  <!-- Tableau des sessions -->
+  <table class="table table-hover align-middle">
+    <thead class="table-dark">
+      <tr>
+        <th>Borne</th>
+        <th>Ville</th>
+        <th>Date de début</th>
+        <th>Durée</th>
+        <th>Énergie (kWh)</th>
+        <th>Coût estimé</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in sessions %}
+      <tr>
+        <td><strong>{{ s.borne.identifiant }}</strong></td>
+        <td>{{ s.borne.ville }}</td>
+        <td>{{ s.date_debut|date:"d/m/Y H:i" }}</td>
+        <td>{{ s.duree_formatee }}</td>
+        <td>
+          <span class="badge bg-success">{{ s.energie_kwh }} kWh</span>
+        </td>
+        <td>{{ s.cout_estime }} €</td>
+        <td>
+          <div class="d-flex gap-1">
+            <a href="{% url 'bornes:session_modifier' s.pk %}"
+               class="btn btn-sm btn-outline-warning">✏️</a>
+            <a href="{% url 'bornes:session_supprimer' s.pk %}"
+               class="btn btn-sm btn-outline-danger">🗑️</a>
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+        <tr>
+          <td colspan="7" class="text-center text-muted">Aucune session enregistrée.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Pagination -->
+  {% if is_paginated %}
+  <nav>
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+        </li>
+      {% endif %}
+      <li class="page-item disabled">
+        <span class="page-link">
+          Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+        </span>
+      </li>
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0">⚡ Types de connecteurs</h2>
+    <a href="{% url 'bornes:liste' %}" class="btn btn-outline-secondary btn-sm">
+      ← Retour aux bornes
+    </a>
+  </div>
+
+  <div class="row g-4">
+    {% for c in connecteurs %}
+    <div class="col-md-4">
+      <div class="card h-100 border-0"
+           style="background:#161b22; border: 1px solid #30363d !important;">
+        <div class="card-body">
+
+          <!-- Nom + badge vitesse -->
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <h5 class="card-title fw-bold mb-0">{{ c.nom }}</h5>
+            {% if c.vitesse_charge == 'rapide' %}
+              <span class="badge bg-danger">⚡ Rapide</span>
+            {% else %}
+              <span class="badge bg-info text-dark">🔋 Standard</span>
+            {% endif %}
+          </div>
+
+          <!-- Nombre de bornes associées -->
+          <p class="card-text text-secondary mb-3">
+            <span class="fs-4 fw-bold text-white">{{ c.nb_bornes }}</span>
+            borne{{ c.nb_bornes|pluralize }} associée{{ c.nb_bornes|pluralize }}
+          </p>
+
+          <!-- Lien vers les bornes filtrées par ce connecteur -->
+          <a href="{% url 'bornes:liste' %}?connecteur={{ c.id }}"
+             class="btn btn-outline-primary btn-sm w-100">
+            Voir les bornes
+          </a>
+
+        </div>
+      </div>
+    </div>
+    {% empty %}
+      <div class="col">
+        <p class="text-muted">Aucun type de connecteur enregistré.</p>
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

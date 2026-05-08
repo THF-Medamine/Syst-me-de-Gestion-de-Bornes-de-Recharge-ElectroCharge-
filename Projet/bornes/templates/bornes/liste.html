@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Barre de filtres -->
+  <form method="get" class="row g-2 mb-4">
+    <div class="col-md-3">
+      <input type="text" name="ville" class="form-control"
+             placeholder="Rechercher par ville..."
+             value="{{ params.ville }}">
+    </div>
+    <div class="col-md-2">
+      <select name="statut" class="form-select">
+        <option value="">Tous les statuts</option>
+        {% for val, label in statut_choices %}
+          <option value="{{ val }}" {% if params.statut == val %}selected{% endif %}>
+            {{ label }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <select name="connecteur" class="form-select">
+        <option value="">Tous les connecteurs</option>
+        {% for c in connecteurs %}
+          <option value="{{ c.id }}" {% if params.connecteur == c.id|stringformat:"s" %}selected{% endif %}>
+            {{ c.nom }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <input type="number" name="puissance_min" class="form-control"
+             placeholder="Puissance min. (kW)"
+             value="{{ params.puissance_min }}">
+    </div>
+    <div class="col-md-1">
+      <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+    </div>
+    <div class="col-md-1">
+      <a href="{% url 'bornes:liste' %}" class="btn btn-outline-secondary w-100">Reset</a>
+    </div>
+  </form>
+
+  <!-- Tableau des bornes -->
+  <table class="table table-hover align-middle">
+    <thead class="table-dark">
+      <tr>
+        <th>Identifiant</th>
+        <th>Ville</th>
+        <th>Puissance</th>
+        <th>Connecteur</th>
+        <th>Statut</th>
+        <th>Installation</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for borne in bornes %}
+      <tr>
+        <td><strong>{{ borne.identifiant }}</strong></td>
+        <td>{{ borne.ville }}</td>
+        <td>{{ borne.puissance_kw }} kW</td>
+        <td>{{ borne.type_connecteur }}</td>
+        <td>
+          {% if borne.statut == 'libre' %}
+            <span class="badge bg-primary">Libre</span>
+          {% elif borne.statut == 'occupee' %}
+            <span class="badge bg-warning text-dark">Occupée</span>
+          {% else %}
+            <span class="badge bg-secondary">En maintenance</span>
+          {% endif %}
+        </td>
+        <td>{{ borne.date_installation|date:"d/m/Y" }}</td>
+        <td>
+          <a href="{% url 'bornes:detail' borne.pk %}" class="btn btn-sm btn-outline-info">
+            Détail
+          </a>
+        </td>
+      </tr>
+      {% empty %}
+        <tr><td colspan="7" class="text-center text-muted">Aucune borne trouvée.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Pagination -->
+  {% if is_paginated %}
+  <nav>
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+        </li>
+      {% endif %}
+      <li class="page-item disabled">
+        <span class="page-link">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+      </li>
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+
+</div>
+{% endblock %}
