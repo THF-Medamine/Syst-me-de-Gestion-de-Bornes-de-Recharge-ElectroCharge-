@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card border-0" style="background:#161b22; border:1px solid #30363d !important;">
+        <div class="card-body p-4">
+          <h3 class="fw-bold mb-4">➕ Ajouter un technicien</h3>
+          <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+              <label class="form-label text-secondary">Nom d'utilisateur</label>
+              {{ form.username }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary">Mot de passe</label>
+              {{ form.password1 }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary">Confirmer mot de passe</label>
+              {{ form.password2 }}
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-secondary">Rôle</label>
+              {{ form.role }}
+            </div>
+            
+            {% if form.errors %}
+            <div class="alert alert-danger">
+              {% for field in form %}
+                {% for error in field.errors %}
+                  <div>{{ field.label }} : {{ error }}</div>
+                {% endfor %}
+              {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="d-flex gap-2 mt-4">
+              <button type="submit" class="btn btn-primary w-100">Créer</button>
+              <a href="{% url 'bornes:users_list' %}" class="btn btn-outline-secondary w-100">Annuler</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

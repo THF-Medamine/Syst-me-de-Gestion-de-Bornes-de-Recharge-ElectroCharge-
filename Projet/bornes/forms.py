@@ -1,5 +1,7 @@
 from django import forms
 from .models import Borne, SessionCharge
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
 
 
 class SessionChargeForm(forms.ModelForm):
@@ -24,11 +26,16 @@ class SessionChargeForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        # Charger toutes les bornes explicitement
         self.fields['borne'].queryset = Borne.objects.all().order_by('identifiant')
         self.fields['borne'].empty_label = "— Sélectionner une borne —"
-
-        # Formate la date pour le widget datetime-local
         if self.instance and self.instance.pk:
             self.initial['date_debut'] = self.instance.date_debut.strftime('%Y-%m-%dT%H:%M')
+
+
+class BorneStatusForm(forms.ModelForm):
+    class Meta:
+        model = Borne
+        fields = ['statut']
+        widgets = {
+            'statut': forms.Select(attrs={'class': 'form-select'})
+        }

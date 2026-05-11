@@ -1,4 +1,7 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # Create your models here.
 
@@ -57,7 +60,6 @@ class Borne(models.Model):
         return f"{self.identifiant} — {self.ville} [{self.get_statut_display()}]"
 
     def badge_class(self):
-        """Retourne la classe Bootstrap correspondant au statut."""
         mapping = {
             'libre':       'badge bg-primary',
             'occupee':     'badge bg-warning text-dark',
@@ -65,6 +67,7 @@ class Borne(models.Model):
         }
         return mapping.get(self.statut, 'badge bg-light')
     
+
 class SessionCharge(models.Model):
     borne          = models.ForeignKey(
         Borne,
@@ -88,11 +91,9 @@ class SessionCharge(models.Model):
         return f"Session {self.borne.identifiant} — {self.date_debut.strftime('%d/%m/%Y %H:%M')}"
 
     def duree_formatee(self):
-        """Convertit les minutes en format hh:mm."""
         heures  = self.duree_minutes // 60
         minutes = self.duree_minutes % 60
         return f"{heures}h{minutes:02d}"
 
     def cout_estime(self, tarif_kwh=0.20):
-        """Coût estimé en euros selon le tarif au kWh."""
         return round(float(self.energie_kwh) * tarif_kwh, 2)
